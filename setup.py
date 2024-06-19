@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2020, MeteoSwiss, Marco Boscacci <marco.boscacci@meteoswiss.ch>
+# Copyright (C) 2022, Eldes, Matteo Galletti <m.galletti@eldes.it>
 
 import glob
 from setuptools import setup, find_packages
@@ -30,12 +30,12 @@ scripts = glob.glob('examples/*.py')
 
 setup(
     name='pymetranet',
-#    use_scm_version=True,
+    #use_scm_version=True,
     version="0.1.2",
-    author="ELDES",
+    author="Eldes",
     author_email='info@eldes.t',
     description='Python library to load Metranet files',
-    url='https://service.meteoswiss.ch/git/radar/pymetranet',
+    url='https://www.eldesradar.com',
     classifiers=[
         'License :: OSI Approved :: BSD-3-Clause License',
         'Natural Language :: English',
