@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2022, Eldes, Matteo Galletti <m.galletti@eldes.it>
+# Copyright (C) 2024, Eldes, Matteo Galletti <m.galletti@eldes.it>
 
 import glob
 from setuptools import setup, find_packages
