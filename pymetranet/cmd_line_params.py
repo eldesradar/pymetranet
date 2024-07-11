@@ -1,6 +1,6 @@
 #!/bin/env python
 
-from enum import Enum
+from enum import IntEnum
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, List, Dict
 import xml.etree.ElementTree as ET
@@ -102,7 +102,7 @@ class CmdLineParams:
         return len(self.params)
         
 
-class ProductParamType(Enum):
+class ProductParamType(IntEnum):
     Undefined = 0
     Pid = 1
     Hidden = 2
