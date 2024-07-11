@@ -3,28 +3,10 @@
 #import from system
 import sys
 import os
-import inspect
-
-def find_local_pymetranet(path):
-    if os.path.isdir(path):
-        return True
-        
-    return False
 
 #safe pymetranet import
-try:
-    from pymetranet import *
-except ModuleNotFoundError as ex:
-    script_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    paths = [os.path.dirname(os.path.join(script_dir, "..", "pymetranet")),
-        os.path.dirname(os.path.join(script_dir, "..", "lib", "pymetranet")),
-        os.path.dirname(os.path.join(script_dir, "..", "..", "..", "..", "..", "share", "src", "pymetranet")),
-        os.path.dirname(os.path.join(script_dir, "..", "..", "..", "share", "src", "pymetranet"))]
-    for path in paths:
-        if find_local_pymetranet(path):
-            sys.path.insert(0, path)
-            break
-    from pymetranet import *
+import import_pymetranet
+from pymetranet import *
 
 class CappiParams(ProdParamsBase):
     PARAM_FILES = "files"

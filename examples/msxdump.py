@@ -3,6 +3,8 @@
 import sys
 import argparse
 
+#safe pymetranet import
+import import_pymetranet
 from pymetranet.volumesweep import PolarSweep, MomentInfo
 from pymetranet.volumesweep_serializer import PolarSweepSerializer
 
