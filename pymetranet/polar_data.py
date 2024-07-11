@@ -1,8 +1,10 @@
 #!/bin/env python
 
+from typing import List
+import math
 import numpy as np
 
-from pymetranet import PolarSweep, PolarSweepInfo, MomentInfo, MomentUUid
+from pymetranet import PolarSweep, PolarSweepInfo, MomentInfo, MomentUUid, MapSizeRect
 
 class PolarPpiData:
     _SIZE = 360
@@ -128,9 +130,38 @@ class PolarPpiData:
         
     def resize(self):
         pass
+
+    #if size is not specified or is None polar2rect auto determines
+    #the size of the rect considering to generate a square rect
+    #with a size of num_gates*2 x num_gates*2 as pixel resolution
+    #and an x_res and y_res both equal to the gate_width
+    def polar2rect(self, gate_width: float, size: MapSizeRect=None) -> np.ndarray:
+        if size is None:
+            x_y_size: int = self.num_gates * 2
+            size = MapSizeRect(x_y_size, x_y_size, gate_width, gate_width)
+
+        x_res: float = size.x_res * size.x_res
+        y_res: float = size.y_res * size.y_res
         
-    def polar2rect(self):
-        pass
+        radar_x0: float = (size.x_size - 1) * 0.5
+        radar_y0: float = (size.y_size - 1) * 0.5
+
+        num_gates: int = self.num_gates
+        
+        output = np.full((size.y_size, size.x_size), np.nan)
+        
+        for j in range(size.y_size):
+            y = j -radar_y0
+            for i in range(size.x_size):
+                x = i - radar_x0
+                r = math.sqrt(x * x * x_res + y * y * y_res) #in km
+                irng = int(r / gate_width + 0.5)
+                if irng < num_gates:
+                    azimuth = 57.2957795 * math.atan2(x, y)
+                    iaz = 180 - int(azimuth)
+                    output[j][i] = self._data[iaz][irng]
+        
+        return output
         
     def __detect_norm(self, sweep_info: PolarSweepInfo, mom_info: MomentInfo) -> bool:
         if mom_info.momentid in [MomentUUid.W, MomentUUid.W_V]:

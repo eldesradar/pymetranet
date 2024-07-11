@@ -5,11 +5,12 @@ import sys
 import os
 import math
 import argparse
+import numpy as np
 from PIL import Image, ImageDraw
 
 #safe pymetranet import
 import import_pymetranet
-from pymetranet import PolarSweepSerializer, PolarPpiData
+from pymetranet import PolarSweepSerializer, PolarSweep, PolarPpiData
 
 ERADIUS = 6371000.0 * 4.0 / 3.0
 EARTH_RADIUS = ERADIUS * 0.001
@@ -25,6 +26,31 @@ def calc_range(gate_range, sin_elev, cos_elev, radar_height):
     
     return gate_height, gate_horizon_distance
     
+def generate_waterfall_image_from_polar(polar: PolarPpiData):
+    img_waterfall = Image.new("RGB", (polar.num_gates, polar.num_rays), (255, 255, 255))
+    for i in range(polar.num_rays):
+        for j in range(polar.num_gates):
+            if not math.isnan(polar.data[i][j]):
+                img_waterfall.putpixel((j, i), (0, 0, 0))
+
+    return img_waterfall
+
+def generate_rect_image_from_rect(rect: np.ndarray):
+    height = rect.shape[0]
+    width = rect.shape[1]
+    img_rect = Image.new("RGB", (width, height), (255, 255, 255))
+    for i in range(height):
+        for j in range(width):
+            if not math.isnan(rect[i][j]):
+                img_rect.putpixel((j, i), (0, 0, 0))
+
+    return img_rect
+
+    #for ray_row in range(polar.num_rays):
+            #for gate_col in range(polar.num_gates):
+                #if not math.isnan(polar.data[ray_row][gate_col]):
+                    #print("data[%03d][%03d]: %g" % (ray_row, gate_col, polar.data[ray_row][gate_col]))
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mom", type=str, default="Z")
@@ -46,65 +72,30 @@ def main():
                 #if not math.isnan(polar.data[ray_row][gate_col]):
                     #print("data[%03d][%03d]: %g" % (ray_row, gate_col, polar.data[ray_row][gate_col]))
         
-        #generate waterfall image
-        img_waterfall = Image.new("RGB", (polar.num_gates, polar.num_rays), (255, 255, 255))
-        for i in range(polar.num_rays):
-            for j in range(polar.num_gates):
-                if not math.isnan(polar.data[i][j]):
-                    img_waterfall.putpixel((j, i), (0, 0, 0))
+        #generate waterfall image from polar
+        img_waterfall = generate_waterfall_image_from_polar(polar)
         
         #save waterfall image to disk
         script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
         img_waterfall_path = os.path.join(script_dir, os.path.basename(file_name) + ".waterfall.png")
         img_waterfall.save(img_waterfall_path)
         print("image saved in %s" % img_waterfall_path)
-        
-        #generate polar image
-        radar_height = loaded_sweep.sweepheader.radarheight
-        gate_width = loaded_sweep.sweepheader.gatewidth
-        middle_ray_idx = int(len(loaded_sweep.rays) / 2)
-        elevation = loaded_sweep.rays[middle_ray_idx].get_startel_deg() #elevation of central ray
-        sin_elev = math.sin(math.radians(elevation))
-        cos_elev = math.cos(math.radians(elevation))
-        num_gates = polar.num_gates
-        not_use_earth_curvature = False
-        img_polar = Image.new("RGB", (polar.num_gates, polar.num_gates), (255, 255, 255))
-        for i in range(polar.num_rays):
-            for j in range(polar.num_gates):
-                #if data is NODATA skip it and do not draw it
-                if math.isnan(polar.data[i][j]):
-                    continue
-                    
-                #calculate current gate range
-                if not_use_earth_curvature:
-                    cur_range = (j * gate_width)
-                else:
-                    #adjust range taking into account the elevation of the sweep and the earth curvature
-                    gate_range = (j + 0.5) * gate_width
-                    gate_height, gate_horizon_distance = calc_range(gate_range, sin_elev, cos_elev, radar_height)
-                    cur_range = gate_horizon_distance
-                
-                #calculation of x, y, with original az
-                orig_az_x = cur_range * math.sin(math.radians(i))
-                orig_az_y = cur_range * math.cos(math.radians(i))
-                
-                x_pixel = round(orig_az_x / gate_width)
-                y_pixel = round(orig_az_y / gate_width)
-                x_pixel = round((num_gates / 2) + x_pixel)
-                y_pixel = round((num_gates / 2) - y_pixel)
-                if x_pixel < 0 or x_pixel >= num_gates:
-                    #print("x_pixel exceeds width of image which is %d" % num_gates)
-                    pass
-                elif y_pixel < 0 or y_pixel >= num_gates:
-                    #print("y_pixel exceeds height of image which is %d" % num_gates)
-                    pass
-                else:
-                    img_polar.putpixel((x_pixel, y_pixel), (0, 0, 0))
-        
+
+        #generate rect from polar
+        gw = loaded_sweep.sweepheader.gatewidth
+        rect = polar.polar2rect(gw)
+        #print("calculated rect using %d gates with a gate width of %g so resulting " \
+            #"with a range of: %gkm" % (polar.num_gates, gw, polar.num_gates * gw))
+        #print(rect.shape)
+        #print(rect)
+
+        #generate rect image from rect
+        img_rect = generate_rect_image_from_rect(rect)
+
         #save polar image to disk
-        img_polar_path = os.path.join(script_dir, os.path.basename(file_name) + ".polar.png")
-        img_polar.save(img_polar_path)
-        print("image saved in %s" % img_polar_path)
+        img_rect_path = os.path.join(script_dir, os.path.basename(file_name) + ".rect.png")
+        img_rect.save(img_rect_path)
+        print("image saved in %s" % img_rect_path)
 
     return 0
 
