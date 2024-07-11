@@ -260,7 +260,7 @@ class ProductParam(ABC):
         
     @descr.setter
     def descr(self, value: str) -> None:
-        self._descr = descr
+        self._descr = value
 
     @property
     def param_type(self) -> ProductParamType:
@@ -937,8 +937,8 @@ class ProdParamsBase(ABC):
                     #paramInt = param.AsInt()
                     param_range = param.param_range
                     if param_range.has_range:
-                        if not is_in_range(value, param_range.val_min, param_range.val_max):
-                            str_min, str_max = get_param_range(param)
+                        if not self.is_in_range(value, param_range.val_min, param_range.val_max):
+                            str_min, str_max = self.get_param_range(param)
                             rangeValues = "{%s}-{%s}" % (str_min, str_max)
                             raise ValueError(f"parameter '{param_name}': invalid value '{param_value}' for range '{rangeValues}'")
                                 
@@ -952,8 +952,8 @@ class ProdParamsBase(ABC):
                         #paramFloat = param.AsFloat()
                         param_range = param.param_range
                         if param_range.has_range:
-                            if not is_in_range(value, param_range.val_min, param_range.val_max):
-                                str_min, str_max = get_param_range(param)
+                            if not self.is_in_range(value, param_range.val_min, param_range.val_max):
+                                str_min, str_max = self.get_param_range(param)
                                 rangeValues = "{%s}-{%s}" % (str_min, str_max)
                                 raise ValueError(f"parameter '{param_name}': invalid value '{param_value}' for range '{rangeValues}'")
                                 
@@ -963,11 +963,11 @@ class ProdParamsBase(ABC):
                     #paramRect = param
                     param_range = param.param_range
                     if param_range.has_range:
-                        if not is_in_range(value.x_size, param_range.val_min.x_size,  param_range.val_max.x_size) or \
-                            not IsInRange(value.y_size, param_range.val_min.y_size,  param_range.val_max.y_size) or \
-                            not IsInRange(value.x_res, param_range.val_min.x_res,  param_range.val_max.x_res) or \
-                            not IsInRange(value.y_res, param_range.val_min.y_res,  param_range.val_max.y_res):
-                                str_min, str_max = get_param_range(param)
+                        if not self.is_in_range(value.x_size, param_range.val_min.x_size,  param_range.val_max.x_size) or \
+                            not self.is_in_range(value.y_size, param_range.val_min.y_size,  param_range.val_max.y_size) or \
+                            not self.is_in_range(value.x_res, param_range.val_min.x_res,  param_range.val_max.x_res) or \
+                            not self.is_in_range(value.y_res, param_range.val_min.y_res,  param_range.val_max.y_res):
+                                str_min, str_max = self.get_param_range(param)
                                 rangeValues = "{%s}-{%s}" % (str_min, str_max)
                                 raise ValueError(f"parameter '{param_name}': invalid value '{param_value}' for range '{rangeValues}'")
         
