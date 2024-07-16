@@ -2,6 +2,7 @@
 
 import xml.etree.ElementTree as ET
 
+
 class XmlUtil:
     class INFO_SERVO_CMD:
         def __init__(self):
@@ -43,7 +44,7 @@ class XmlUtil:
             self.servo_cmd: INFO_SERVO_CMD = INFO_SERVO_CMD()
             self.rsp_cmd: INFO_RSP_CMD = INFO_RSP_CMD()
             self.tx_cmd: INFO_TX_CMD = INFO_TX_CMD()
-        
+
     @staticmethod
     def parse_sweep_data(self, xml_data: str) -> SWEEP:
         sweep_data = SWEEP()
@@ -63,7 +64,7 @@ class XmlUtil:
                         az_rate=cmd_node.get("az_rate", ""),
                         angle_width=cmd_node.get("angle_width", ""),
                         min_elevation=cmd_node.get("min_elevation", ""),
-                        max_elevation=cmd_node.get("max_elevation", "")
+                        max_elevation=cmd_node.get("max_elevation", ""),
                     )
 
             rsp_node = sweep_node.find("RSP")
@@ -83,7 +84,7 @@ class XmlUtil:
                         sqi=cmd_node.get("sqi", ""),
                         csr=cmd_node.get("csr", ""),
                         log=cmd_node.get("log", ""),
-                        exe=cmd_node.get("exe", "")
+                        exe=cmd_node.get("exe", ""),
                     )
 
             tx_node = sweep_node.find("TX")
@@ -94,7 +95,7 @@ class XmlUtil:
                         bt=cmd_node.get("BT", ""),
                         at=cmd_node.get("AT", ""),
                         rad=cmd_node.get("RAD", ""),
-                        pot=cmd_node.get("POT", "")
+                        pot=cmd_node.get("POT", ""),
                     )
 
         return sweep_data
