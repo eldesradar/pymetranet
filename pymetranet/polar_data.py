@@ -1,7 +1,6 @@
 #!/bin/env python
 
 from typing import List
-import math
 import numpy as np
 
 from pymetranet import PolarSweep, PolarSweepInfo, MomentInfo, MomentUUid, MapSizeRect
@@ -118,7 +117,7 @@ class PolarPpiData:
                 
                 #correction to prevent holes
                 if j == az_stop and buff[az] != 0:
-                   continue;
+                   continue
                 buff[az] += 1
                 
                 #copy the value in the internal matrix at the index 'az' 'k'
@@ -135,32 +134,39 @@ class PolarPpiData:
     #the size of the rect considering to generate a square rect
     #with a size of num_gates*2 x num_gates*2 as pixel resolution
     #and an x_res and y_res both equal to the gate_width
-    def polar2rect(self, gate_width: float, size: MapSizeRect=None) -> np.ndarray:
+    def polar2rect(self, gate_width: float, size: MapSizeRect = None) -> np.ndarray:
         if size is None:
             x_y_size: int = self.num_gates * 2
             size = MapSizeRect(x_y_size, x_y_size, gate_width, gate_width)
 
-        x_res: float = size.x_res * size.x_res
-        y_res: float = size.y_res * size.y_res
-        
+        x_res: float = size.x_res
+        y_res: float = size.y_res
+
         radar_x0: float = (size.x_size - 1) * 0.5
         radar_y0: float = (size.y_size - 1) * 0.5
 
         num_gates: int = self.num_gates
-        
+
         output = np.full((size.y_size, size.x_size), np.nan)
-        
-        for j in range(size.y_size):
-            y = j -radar_y0
-            for i in range(size.x_size):
-                x = i - radar_x0
-                r = math.sqrt(x * x * x_res + y * y * y_res) #in km
-                irng = int(r / gate_width + 0.5)
-                if irng < num_gates:
-                    azimuth = 57.2957795 * math.atan2(x, y)
-                    iaz = 180 - int(azimuth)
-                    output[j][i] = self._data[iaz][irng]
-        
+
+        # Create meshgrid for x and y coordinates
+        y_indices, x_indices = np.meshgrid(np.arange(size.y_size), np.arange(size.x_size), indexing='ij')
+        x = (x_indices - radar_x0) * x_res
+        y = (y_indices - radar_y0) * y_res
+
+        # Calculate r and azimuth in vectorized form
+        r = np.sqrt(x * x + y * y)  # in km
+        irng = (r / gate_width).astype(int)
+
+        # Calculate azimuth and convert to array index
+        azimuth = np.degrees(np.arctan2(x, y))
+        iaz = 180 - azimuth.astype(int) 
+
+        # Create mask for valid indices
+        valid_mask = (irng < num_gates) & (iaz >= 0) & (iaz < 360)
+
+        # Populate the output array
+        output[valid_mask] = self._data[iaz[valid_mask], irng[valid_mask]]
         return output
         
     def __detect_norm(self, sweep_info: PolarSweepInfo, mom_info: MomentInfo) -> bool:
