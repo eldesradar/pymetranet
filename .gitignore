@@ -1,2 +1,4 @@
 /examples/**/__pycache__/
+/examples/*.png
+/examples/data/
 /pymetranet/**/__pycache__/
