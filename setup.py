@@ -31,10 +31,10 @@ scripts = glob.glob('examples/*.py')
 setup(
     name='pymetranet',
     #use_scm_version=True,
-    version="0.1.2",
+    version="0.2.1",
     author="Eldes",
     author_email='info@eldes.t',
-    description='Python library to load Metranet files',
+    description='Python Metranet library',
     url='https://www.eldesradar.com',
     classifiers=[
         'License :: OSI Approved :: BSD-3-Clause License',
@@ -45,7 +45,7 @@ setup(
     entry_points={},
     scripts=scripts,
     license="BSD-3-Clause license",
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     include_package_data=True,
     zip_safe=False,
     test_suite='test',

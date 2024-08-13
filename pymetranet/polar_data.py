@@ -1,14 +1,16 @@
-#!/bin/env python
+#!/bin/env python3
 
 from typing import List
+import math
 import numpy as np
 
-from pymetranet import PolarSweep, PolarSweepInfo, MomentInfo, MomentUUid, MapSizeRect
+from .volumesweep import PolarSweep, PolarSweepInfo, MomentInfo, MomentUUid
+from .cmd_line_params import MapSizeRect
 
 class PolarPpiData:
     _SIZE = 360
     
-    def __init__(self, num_gates: int=0):
+    def __init__(self, num_gates: int=0, data: np.ndarray=None):
         self._num_gates = num_gates
         self._mom_id = 0
         self._norm = False
@@ -18,8 +20,8 @@ class PolarPpiData:
             self._num_rays = 0
             self._data = None
         else:
-            self._num_rays = PolarPpiData.__SIZE
-            self._data = np.full((self._SIZE, num_gates), np.nan)
+            self._num_rays = PolarPpiData._SIZE
+            self._data = data if data is not None else np.full((self._SIZE, num_gates), np.nan)
         
     @property
     def num_gates(self) -> int:
@@ -42,8 +44,23 @@ class PolarPpiData:
         return self._mult
         
     @property
-    def data(self):
+    def data(self) -> np.ndarray:
         return self._data
+    
+    @data.setter
+    def data(self, value: np.ndarray) -> None:
+        #verify shape
+        assert len(value.shape) == 2
+        assert value.shape[0] == self._SIZE
+        assert value.shape[1] > 0
+
+        #set internal members
+        self._num_gates = value.shape[1]
+        self._mom_id = 0
+        self._norm = False
+        self._mult = float("nan")
+        self._num_rays = PolarPpiData._SIZE
+        self._data = value
         
     def get_ray(self, index: int):
         return self._data[index]
@@ -117,7 +134,7 @@ class PolarPpiData:
                 
                 #correction to prevent holes
                 if j == az_stop and buff[az] != 0:
-                   continue
+                   continue;
                 buff[az] += 1
                 
                 #copy the value in the internal matrix at the index 'az' 'k'
@@ -134,7 +151,45 @@ class PolarPpiData:
     #the size of the rect considering to generate a square rect
     #with a size of num_gates*2 x num_gates*2 as pixel resolution
     #and an x_res and y_res both equal to the gate_width
-    def polar2rect(self, gate_width: float, size: MapSizeRect = None) -> np.ndarray:
+    def polar2rect(self, gate_width: float, size: MapSizeRect=None, vectorized: bool=True) -> np.ndarray:
+        if vectorized:
+            return self.__polar2rect_vectorized(gate_width, size)
+        else:
+            return self.__polar2rect(gate_width, size)
+
+    #if size is not specified or is None polar2rect auto determines
+    #the size of the rect considering to generate a square rect
+    #with a size of num_gates*2 x num_gates*2 as pixel resolution
+    #and an x_res and y_res both equal to the gate_width
+    def __polar2rect(self, gate_width: float, size: MapSizeRect=None) -> np.ndarray:
+        if size is None:
+            x_y_size: int = self.num_gates * 2
+            size = MapSizeRect(x_y_size, x_y_size, gate_width, gate_width)
+
+        x_res: float = size.x_res * size.x_res
+        y_res: float = size.y_res * size.y_res
+        
+        radar_x0: float = (size.x_size - 1) * 0.5
+        radar_y0: float = (size.y_size - 1) * 0.5
+
+        num_gates: int = self.num_gates
+        
+        output = np.full((size.y_size, size.x_size), np.nan)
+        
+        for j in range(size.y_size):
+            y = j -radar_y0
+            for i in range(size.x_size):
+                x = i - radar_x0
+                r = math.sqrt(x * x * x_res + y * y * y_res) #in km
+                irng = int(r / gate_width + 0.5)
+                if irng < num_gates:
+                    azimuth = 57.2957795 * math.atan2(x, y)
+                    iaz = 180 - int(azimuth)
+                    output[j][i] = self._data[iaz][irng]
+        
+        return output
+        
+    def __polar2rect_vectorized(self, gate_width: float, size: MapSizeRect=None) -> np.ndarray:
         if size is None:
             x_y_size: int = self.num_gates * 2
             size = MapSizeRect(x_y_size, x_y_size, gate_width, gate_width)
@@ -156,19 +211,20 @@ class PolarPpiData:
 
         # Calculate r and azimuth in vectorized form
         r = np.sqrt(x * x + y * y)  # in km
-        irng = (r / gate_width).astype(int)
+        irng = (r / gate_width + 0.5).astype(int)
 
         # Calculate azimuth and convert to array index
         azimuth = np.degrees(np.arctan2(x, y))
-        iaz = 180 - azimuth.astype(int) 
+        iaz = 180 - azimuth.astype(int)
 
         # Create mask for valid indices
         valid_mask = (irng < num_gates) & (iaz >= 0) & (iaz < 360)
 
         # Populate the output array
         output[valid_mask] = self._data[iaz[valid_mask], irng[valid_mask]]
+
         return output
-        
+    
     def __detect_norm(self, sweep_info: PolarSweepInfo, mom_info: MomentInfo) -> bool:
         if mom_info.momentid in [MomentUUid.W, MomentUUid.W_V]:
             return sweep_info.is_width_normalized()

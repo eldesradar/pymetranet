@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/bin/env python3
 
 #import from system
 import sys
@@ -6,9 +6,9 @@ import os
 
 #safe pymetranet import
 import import_pymetranet
-from pymetranet import *
+import pymetranet as met
 
-class CappiParams(ProdParamsBase):
+class CappiParams(met.ProdParamsBase):
     PARAM_FILES = "files"
     PARAM_PID = "pid"
     PARAM_MOMENT = "moment"
@@ -43,46 +43,49 @@ class CappiParams(ProdParamsBase):
     PARAM_COMMENTS = "comments"
     
     def __init__(self):
-        ProdParamsBase.__init__(self)
+        super().__init__()
 
         #map the fields and info product info defaults, ranges, etc...
-        self.init_param_info();
-        self.init_product_info();
+        self.init_param_info()
+        self.init_product_info()
         
     def init_param_info(self) -> None:
         #set default to values
-        self._map_param_info[CappiParams.PARAM_FILES] = ProductParamInfo("", ProductParamType.Hidden)
-        self._map_param_info[CappiParams.PARAM_PID] = ProductParamInfo("", ProductParamType.Pid)
-        self._map_param_info[CappiParams.PARAM_MOMENT] = ProductParamInfo("Z", ProductParamType.Enum)
-        self._map_param_info[CappiParams.PARAM_TIME] = ProductParamInfo("", ProductParamType.Hidden)
-        self._map_param_info[CappiParams.PARAM_CURSWEEP] = ProductParamInfo(1, ProductParamType.Hidden)
-        self._map_param_info[CappiParams.PARAM_VOLSWEEPS] = ProductParamInfo(1, ProductParamType.Hidden)
-        self._map_param_info[CappiParams.PARAM_IN_TYPE] = ProductParamInfo("MSE", ProductParamType.Pid)
-        self._map_param_info[CappiParams.PARAM_HEIGHT] = ProductParamInfo(1, ProductParamType.Float)
-        self._map_param_info[CappiParams.PARAM_PSEUDO] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_KDPMAX] = ProductParamInfo(28, ProductParamType.Float)
-        self._map_param_info[CappiParams.PARAM_BBCORR] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_DEACORR] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_FORMAT] = ProductParamInfo("RECT", ProductParamType.Enum)
-        self._map_param_info[CappiParams.PARAM_DATABITS] = ProductParamInfo("8", ProductParamType.Enum)
-        self._map_param_info[CappiParams.PARAM_SIZE] = ProductParamInfo(MapSizeRect(400, 400, 1, 1), ProductParamType.MapSizeRect)
-        self._map_param_info[CappiParams.PARAM_COMPRESS] = ProductParamInfo(True, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_ZVPR] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_INDIR] = ProductParamInfo("/opt/metraserver/data", ProductParamType.PathDir)
-        self._map_param_info[CappiParams.PARAM_OUTDIR] = ProductParamInfo("/opt/metraserver/data", ProductParamType.PathDir)
-        self._map_param_info[CappiParams.PARAM_VERBOSE] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_LINKIT] = ProductParamInfo(False, ProductParamType.Bool)
-        self._map_param_info[CappiParams.PARAM_ENCODING] = ProductParamInfo("hard-coded", ProductParamType.PathFile)
-        self._map_param_info[CappiParams.PARAM_LINK_NODE_FILE] = ProductParamInfo("default", ProductParamType.PathFile)
-        self._map_param_info[CappiParams.PARAM_DATA_LEVEL_FILE] = ProductParamInfo("default", ProductParamType.PathFile)
-        self._map_param_info[CappiParams.PARAM_BLOCK_CORR_FILE] = ProductParamInfo("default", ProductParamType.PathFile)
-        self._map_param_info[CappiParams.PARAM_SPECKLE] = ProductParamInfo(0, ProductParamType.Int)
-        self._map_param_info[CappiParams.PARAM_FLT_COEFF] = ProductParamInfo("default", ProductParamType.PathFile)
-        self._map_param_info[CappiParams.PARAM_FLT_LOOPS] = ProductParamInfo(10, ProductParamType.Int)
-        self._map_param_info[CappiParams.PARAM_FLT_THR] = ProductParamInfo(4.0, ProductParamType.Float)
-        self._map_param_info[CappiParams.PARAM_FLT_FACTOR] = ProductParamInfo(1.3, ProductParamType.Float)
-        self._map_param_info[CappiParams.PARAM_REG_WIDTH] = ProductParamInfo(10, ProductParamType.Int)
-        self._map_param_info[CappiParams.PARAM_COMMENTS] = ProductParamInfo("", ProductParamType.String)
+        CP = CappiParams
+        PPInfo = met.ProductParamInfo
+        PPType = met.ProductParamType
+        self._map_param_info[CP.PARAM_FILES] = PPInfo("", PPType.Hidden)
+        self._map_param_info[CP.PARAM_PID] = PPInfo("", PPType.Pid)
+        self._map_param_info[CP.PARAM_MOMENT] = PPInfo("Z", PPType.Enum)
+        self._map_param_info[CP.PARAM_TIME] = PPInfo("", PPType.Hidden)
+        self._map_param_info[CP.PARAM_CURSWEEP] = PPInfo(1, PPType.Hidden)
+        self._map_param_info[CP.PARAM_VOLSWEEPS] = PPInfo(1, PPType.Hidden)
+        self._map_param_info[CP.PARAM_IN_TYPE] = PPInfo("MSE", PPType.Pid)
+        self._map_param_info[CP.PARAM_HEIGHT] = PPInfo(1, PPType.Float)
+        self._map_param_info[CP.PARAM_PSEUDO] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_KDPMAX] = PPInfo(28, PPType.Float)
+        self._map_param_info[CP.PARAM_BBCORR] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_DEACORR] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_FORMAT] = PPInfo("RECT", PPType.Enum)
+        self._map_param_info[CP.PARAM_DATABITS] = PPInfo("8", PPType.Enum)
+        self._map_param_info[CP.PARAM_SIZE] = PPInfo(met.MapSizeRect(400, 400, 1, 1), PPType.MapSizeRect)
+        self._map_param_info[CP.PARAM_COMPRESS] = PPInfo(True, PPType.Bool)
+        self._map_param_info[CP.PARAM_ZVPR] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_INDIR] = PPInfo("/opt/metraserver/data", PPType.PathDir)
+        self._map_param_info[CP.PARAM_OUTDIR] = PPInfo("/opt/metraserver/data", PPType.PathDir)
+        self._map_param_info[CP.PARAM_VERBOSE] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_LINKIT] = PPInfo(False, PPType.Bool)
+        self._map_param_info[CP.PARAM_ENCODING] = PPInfo("hard-coded", PPType.PathFile)
+        self._map_param_info[CP.PARAM_LINK_NODE_FILE] = PPInfo("default", PPType.PathFile)
+        self._map_param_info[CP.PARAM_DATA_LEVEL_FILE] = PPInfo("default", PPType.PathFile)
+        self._map_param_info[CP.PARAM_BLOCK_CORR_FILE] = PPInfo("default", PPType.PathFile)
+        self._map_param_info[CP.PARAM_SPECKLE] = PPInfo(0, PPType.Int)
+        self._map_param_info[CP.PARAM_FLT_COEFF] = PPInfo("default", PPType.PathFile)
+        self._map_param_info[CP.PARAM_FLT_LOOPS] = PPInfo(10, PPType.Int)
+        self._map_param_info[CP.PARAM_FLT_THR] = PPInfo(4.0, PPType.Float)
+        self._map_param_info[CP.PARAM_FLT_FACTOR] = PPInfo(1.3, PPType.Float)
+        self._map_param_info[CP.PARAM_REG_WIDTH] = PPInfo(10, PPType.Int)
+        self._map_param_info[CP.PARAM_COMMENTS] = PPInfo("", PPType.String)
         
     def init_product_info(self) -> None:
         prod_info = self._product_info
@@ -93,60 +96,60 @@ class CappiParams(ProdParamsBase):
         prod_info.description = "The program cappi generates CAPPI product"
 
         #define some shortcuts to easily create types
-        DEF_STR = lambda value : ProductParamDefault[str](True, value)
-        DEF_BOOL = lambda value : ProductParamDefault[bool](True, value)
-        DEF_INT = lambda value : ProductParamDefault[int](True, value)
-        DEF_FLOAT = lambda value : ProductParamDefault[float](True, value)
-        RNG_INT = lambda val_min, val_max : ProductParamRange[int](True, val_min, val_max)
-        RNG_FLOAT = lambda val_min, val_max : ProductParamRange[float](True, val_min, val_max)
-        RNG_SIZE = lambda val_min, val_max : ProductParamRange[MapSizeRect](True, val_min, val_max)
+        DEF_STR = lambda value : met.ProductParamDefault[str](True, value)
+        DEF_BOOL = lambda value : met.ProductParamDefault[bool](True, value)
+        DEF_INT = lambda value : met.ProductParamDefault[int](True, value)
+        DEF_FLOAT = lambda value : met.ProductParamDefault[float](True, value)
+        RNG_INT = lambda val_min, val_max : met.ProductParamRange[int](True, val_min, val_max)
+        RNG_FLOAT = lambda val_min, val_max : met.ProductParamRange[float](True, val_min, val_max)
+        RNG_SIZE = lambda val_min, val_max : met.ProductParamRange[met.MapSizeRect](True, val_min, val_max)
 
         
         #add general group
-        group_general = ProductParamGroup("General")
+        group_general = met.ProductParamGroup("General")
         prod_info.groups.append(group_general)
         
         #add pid to group general
         key = CappiParams.PARAM_PID
-        prod_info.params.append(ProductParamPid(key,
+        prod_info.params.append(met.ProductParamPid(key,
             "3-letters as Oxy where x represents the moment, y is the radar ID", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
             
         #add moment
         key = CappiParams.PARAM_MOMENT
         moments = ["W", "V", "UZ", "Z", "ZDR", "RHO", "PHIDP", "KDP"]
-        prod_info.params.append(ProductParamEnum(key,
+        prod_info.params.append(met.ProductParamEnum(key,
             "moment type for data processing", group_general,
             map_info[key].value, DEF_STR(map_info[key].value),
             moments, True, True))
             
         #add time
         key = CappiParams.PARAM_TIME
-        prod_info.params.append(ProductParamHidden(key,
+        prod_info.params.append(met.ProductParamHidden(key,
             "time, priority, compression of input, i.e. 1236523550U", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
             
         #add current sweep
         key = CappiParams.PARAM_CURSWEEP
-        prod_info.params.append(ProductParamHidden(key,
+        prod_info.params.append(met.ProductParamHidden(key,
             "input sweep number (volume file extension)", group_general,
             str(map_info[key].value), DEF_STR(str(map_info[key].value))))
             
         #add volume sweeps
         key = CappiParams.PARAM_VOLSWEEPS
-        prod_info.params.append(ProductParamHidden(key,
+        prod_info.params.append(met.ProductParamHidden(key,
             "number of total sweeps (elevations) in volume", group_general,
             str(map_info[key].value), DEF_STR(str(map_info[key].value))))
             
         #add in type
         key = CappiParams.PARAM_IN_TYPE
-        prod_info.params.append(ProductParamPid(key,
+        prod_info.params.append(met.ProductParamPid(key,
             "input file type, combined with 'time' to form filename", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add height
         key = CappiParams.PARAM_HEIGHT
-        prod_info.params.append(ProductParamFloat(key,
+        prod_info.params.append(met.ProductParamFloat(key,
             "height for product", group_general,
             map_info[key].value,
             DEF_FLOAT(map_info[key].value),
@@ -154,13 +157,13 @@ class CappiParams(ProdParamsBase):
             
         #add pseudo
         key = CappiParams.PARAM_PSEUDO
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "create pseudo CAPPI", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
             
         #add kdpmax
         key = CappiParams.PARAM_KDPMAX
-        prod_info.params.append(ProductParamFloat(key,
+        prod_info.params.append(met.ProductParamFloat(key,
             "maximum KDP value (deg/km) in output product", group_general,
             map_info[key].value,
             DEF_FLOAT(map_info[key].value),
@@ -168,20 +171,20 @@ class CappiParams(ProdParamsBase):
             
         #add bb corr
         key = CappiParams.PARAM_BBCORR
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "1 means perform beam blockage correction", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
             
         #add dealiasing correction
         key = CappiParams.PARAM_DEACORR
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "1 means perform dealiasing correction", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
         
         #add format
         key = CappiParams.PARAM_FORMAT
         formats = ["RECT", "POLAR"]
-        prod_info.params.append(ProductParamEnum(key,
+        prod_info.params.append(met.ProductParamEnum(key,
             "data display format selected from RECT or POLAR", group_general,
             map_info[key].value, DEF_STR(map_info[key].value),
             formats))
@@ -189,83 +192,83 @@ class CappiParams(ProdParamsBase):
         #add databits
         key = CappiParams.PARAM_DATABITS
         databits = ["4", "8"]
-        prod_info.params.append(ProductParamEnum(key,
+        prod_info.params.append(met.ProductParamEnum(key,
             "data bits 4 or 8", group_general,
             map_info[key].value, DEF_STR(map_info[key].value),
             databits))
         
         #add size
         key = CappiParams.PARAM_SIZE
-        prod_info.params.append(ProductParamMapSizeRect(key,
+        prod_info.params.append(met.ProductParamMapSizeRect(key,
             "RECT x,y point and resolution (km)", group_general,
             map_info[key].value,
-            ProductParamDefault[MapSizeRect](True, map_info[key].value),
-            RNG_SIZE(MapSizeRect(100, 100, 0.05, 0.05),    #min
-                     MapSizeRect(1000, 1000, 2.0, 2.0))))  #max
+            met.ProductParamDefault[met.MapSizeRect](True, map_info[key].value),
+            RNG_SIZE(met.MapSizeRect(100, 100, 0.05, 0.05),    #min
+                     met.MapSizeRect(1000, 1000, 2.0, 2.0))))  #max
         
         #add compress
         key = CappiParams.PARAM_COMPRESS
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "compress product", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
         
         #add zvpr
         key = CappiParams.PARAM_ZVPR
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "for intensity data, use vpr profile to project data", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
         
         #add indir
         key = CappiParams.PARAM_INDIR
-        prod_info.params.append(ProductParamPathDir(key,
+        prod_info.params.append(met.ProductParamPathDir(key,
             "input data directory", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add outdir
         key = CappiParams.PARAM_OUTDIR
-        prod_info.params.append(ProductParamPathDir(key,
+        prod_info.params.append(met.ProductParamPathDir(key,
             "output data directory", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add verbose
         key = CappiParams.PARAM_VERBOSE
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "verbose flag, 1 for more messages from program", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
         
         #add linkit
         key = CappiParams.PARAM_LINKIT
-        prod_info.params.append(ProductParamBool(key,
+        prod_info.params.append(met.ProductParamBool(key,
             "flag 1 for creating link files for product", group_general,
             map_info[key].value, DEF_BOOL(map_info[key].value)))
         
         #add encoding
         key = CappiParams.PARAM_ENCODING
-        prod_info.params.append(ProductParamPathFile(key,
+        prod_info.params.append(met.ProductParamPathFile(key,
             "file name which specifies moments encoding", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add link node file
         key = CappiParams.PARAM_LINK_NODE_FILE
-        prod_info.params.append(ProductParamPathFile(key,
+        prod_info.params.append(met.ProductParamPathFile(key,
             "file name which specifies link node directory", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add data level file
         key = CappiParams.PARAM_DATA_LEVEL_FILE
-        prod_info.params.append(ProductParamPathFile(key,
+        prod_info.params.append(met.ProductParamPathFile(key,
             "file name which specifies data levels", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add blockage correction file
         key = CappiParams.PARAM_BLOCK_CORR_FILE
-        prod_info.params.append(ProductParamPathFile(key,
+        prod_info.params.append(met.ProductParamPathFile(key,
             "file name for beam blockage correction, default [installdir]/etc/pgs/blockage_correction_'radarname'.dat", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
         
         #add speckle
         key = CappiParams.PARAM_SPECKLE
-        prod_info.params.append(ProductParamInt(key,
+        prod_info.params.append(met.ProductParamInt(key,
             "apply speckle fiter", group_general,
             map_info[key].value,
             DEF_INT(map_info[key].value),
@@ -273,14 +276,14 @@ class CappiParams(ProdParamsBase):
         
         #add filter coefficients
         key = CappiParams.PARAM_FLT_COEFF
-        prod_info.params.append(ProductParamString(key,
+        prod_info.params.append(met.ProductParamString(key,
             "file name which specifies coefficients for PHDP FIR filter", group_general,
             map_info[key].value,
             DEF_STR(map_info[key].value)))
         
         #add filter loops
         key = CappiParams.PARAM_FLT_LOOPS
-        prod_info.params.append(ProductParamInt(key,
+        prod_info.params.append(met.ProductParamInt(key,
             "number of times for filtering", group_general,
             map_info[key].value,
             DEF_INT(map_info[key].value),
@@ -288,7 +291,7 @@ class CappiParams(ProdParamsBase):
         
         #add filter threshold
         key = CappiParams.PARAM_FLT_THR
-        prod_info.params.append(ProductParamFloat(key,
+        prod_info.params.append(met.ProductParamFloat(key,
             "threshold to determine more PHDP filtering", group_general,
             map_info[key].value,
             DEF_FLOAT(map_info[key].value),
@@ -296,7 +299,7 @@ class CappiParams(ProdParamsBase):
         
         #add filter factor
         key = CappiParams.PARAM_FLT_FACTOR
-        prod_info.params.append(ProductParamFloat(key,
+        prod_info.params.append(met.ProductParamFloat(key,
             "factor to change filter threshold", group_general,
             map_info[key].value,
             DEF_FLOAT(map_info[key].value),
@@ -304,7 +307,7 @@ class CappiParams(ProdParamsBase):
         
         #add regression width
         key = CappiParams.PARAM_REG_WIDTH
-        prod_info.params.append(ProductParamInt(key,
+        prod_info.params.append(met.ProductParamInt(key,
             "integrating data points to generate KDP", group_general,
             map_info[key].value,
             DEF_INT(map_info[key].value),
@@ -312,7 +315,7 @@ class CappiParams(ProdParamsBase):
         
         #add comments
         key = CappiParams.PARAM_COMMENTS
-        prod_info.params.append(ProductParamString(key,
+        prod_info.params.append(met.ProductParamString(key,
             "comments added by user", group_general,
             map_info[key].value, DEF_STR(map_info[key].value)))
 
@@ -333,7 +336,7 @@ def main():
     if gest_init_args("CAPPI", sys.argv):
         return 0
         
-    parser = CmdLineParams()
+    parser = met.CmdLineParams()
     ret_parse = parser.parse_cmd_line(len(sys.argv), sys.argv)
     
     #usage of get param count method
@@ -365,8 +368,8 @@ def main():
         
     #construct parameters for product with its default values, then
     #inject command line inside params
-    ret = params.inject(parser);
-    print("injected %d parameters from the command line" % ret);
+    ret = params.inject(parser)
+    print("injected %d parameters from the command line" % ret)
     for param_name, param_value in params.map_info.items():
         print("%s: '%s' (type: %s)" % (param_name, param_value.value, param_value.param_type))
 

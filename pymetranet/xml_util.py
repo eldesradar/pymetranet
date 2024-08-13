@@ -2,7 +2,6 @@
 
 import xml.etree.ElementTree as ET
 
-
 class XmlUtil:
     class INFO_SERVO_CMD:
         def __init__(self):
@@ -41,13 +40,13 @@ class XmlUtil:
     class SWEEP:
         def __init__(self):
             self.ID: str = ""
-            self.servo_cmd: INFO_SERVO_CMD = INFO_SERVO_CMD()
-            self.rsp_cmd: INFO_RSP_CMD = INFO_RSP_CMD()
-            self.tx_cmd: INFO_TX_CMD = INFO_TX_CMD()
-
+            self.servo_cmd: XmlUtil.INFO_SERVO_CMD = XmlUtil.INFO_SERVO_CMD()
+            self.rsp_cmd: XmlUtil.INFO_RSP_CMD = XmlUtil.INFO_RSP_CMD()
+            self.tx_cmd: XmlUtil.INFO_TX_CMD = XmlUtil.INFO_TX_CMD()
+        
     @staticmethod
     def parse_sweep_data(self, xml_data: str) -> SWEEP:
-        sweep_data = SWEEP()
+        sweep_data = XmlUtil.SWEEP()
         root = ET.fromstring(xml_data)
 
         sweep_node = root.find("SWEEP_DATA")
@@ -56,7 +55,7 @@ class XmlUtil:
             if servo_node is not None:
                 cmd_node = servo_node.find("cmd")
                 if cmd_node is not None:
-                    sweep_data.servo_cmd = INFO_SERVO_CMD(
+                    sweep_data.servo_cmd = XmlUtil.INFO_SERVO_CMD(
                         mode=cmd_node.get("mode", ""),
                         elevation=cmd_node.get("elevation", ""),
                         start_az=cmd_node.get("start_az", ""),
@@ -64,14 +63,14 @@ class XmlUtil:
                         az_rate=cmd_node.get("az_rate", ""),
                         angle_width=cmd_node.get("angle_width", ""),
                         min_elevation=cmd_node.get("min_elevation", ""),
-                        max_elevation=cmd_node.get("max_elevation", ""),
+                        max_elevation=cmd_node.get("max_elevation", "")
                     )
 
             rsp_node = sweep_node.find("RSP")
             if rsp_node is not None:
                 cmd_node = rsp_node.find("cmd")
                 if cmd_node is not None:
-                    sweep_data.rsp_cmd = INFO_RSP_CMD(
+                    sweep_data.rsp_cmd = XmlUtil.INFO_RSP_CMD(
                         mode=cmd_node.get("mode", ""),
                         rcr=cmd_node.get("rcr", ""),
                         pol=cmd_node.get("pol", ""),
@@ -84,18 +83,18 @@ class XmlUtil:
                         sqi=cmd_node.get("sqi", ""),
                         csr=cmd_node.get("csr", ""),
                         log=cmd_node.get("log", ""),
-                        exe=cmd_node.get("exe", ""),
+                        exe=cmd_node.get("exe", "")
                     )
 
             tx_node = sweep_node.find("TX")
             if tx_node is not None:
                 cmd_node = tx_node.find("cmd")
                 if cmd_node is not None:
-                    sweep_data.tx_cmd = INFO_TX_CMD(
+                    sweep_data.tx_cmd = XmlUtil.INFO_TX_CMD(
                         bt=cmd_node.get("BT", ""),
                         at=cmd_node.get("AT", ""),
                         rad=cmd_node.get("RAD", ""),
-                        pot=cmd_node.get("POT", ""),
+                        pot=cmd_node.get("POT", "")
                     )
 
         return sweep_data
