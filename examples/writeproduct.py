@@ -138,12 +138,18 @@ def create_encode_data_vectorized(in_data: PolarPpiData) -> np.ndarray:
     buff_in = in_data.data
     buff_out = np.zeros(buff_in.shape, np.uint8)
 
+    """
     #calc dn for all the non-nan elements in a single operation
     dn = (buff_in * 2 + 64).astype(np.int32)
     
     #apply the condition to fill buff_out in a single operation
     valid_mask = np.isfinite(buff_in)
     buff_out[valid_mask] = np.where(dn[valid_mask] < 1, 1, dn[valid_mask])
+    """
+
+    valid_mask = np.isfinite(buff_in)
+    buff_out[valid_mask] = (buff_in[valid_mask] * 2 + 64).astype(np.int32)
+    buff_out[valid_mask] = np.clip(buff_out[valid_mask], 1, 255)
 
     return buff_out
 
@@ -237,7 +243,7 @@ def main():
     for file_name in args.infile:
         print("loading file %s..." % file_name)
         loaded_sweep = PolarSweepSerializer.load(file_name)
-        print("sweep  file %s successfully loaded!" % file_name)
+        print("sweep file %s successfully loaded!" % file_name)
         
         #transform 'mom'
         in_data = PolarPpiData()

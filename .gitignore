@@ -1,6 +1,10 @@
+/dist/
 /examples/**/__pycache__/
 /examples/*.png
+/examples/libpymetranet.so
 /examples/build/
 /examples/data/
 /examples/dist/
+/libpymetranet/dist/
+/libpymetranet/obj/
 /pymetranet/**/__pycache__/

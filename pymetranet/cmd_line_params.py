@@ -962,14 +962,14 @@ class ProdParamsBase(ABC):
                                 
                 elif info.param_type == ProductParamType.MapSizeRect:
                     #validate string as valid mapsizerect
-                    value = ParamMapSizeRectConverter.FromString(param_value)
+                    value = ParamMapSizeRectConverter.from_string(param_value)
                     #paramRect = param
                     param_range = param.param_range
                     if param_range.has_range:
-                        if not self.is_in_range(value.x_size, param_range.min_val.x_size,  param_range.val_max.x_size) or \
-                            not self.is_in_range(value.y_size, param_range.val_min.y_size,  param_range.val_max.y_size) or \
-                            not self.is_in_range(value.x_res, param_range.val_min.x_res,  param_range.val_max.x_res) or \
-                            not self.is_in_range(value.y_res, param_range.val_min.y_res,  param_range.val_max.y_res):
+                        if not self.is_in_range(value.x_size, param_range.min_val.x_size,  param_range.max_val.x_size) or \
+                            not self.is_in_range(value.y_size, param_range.min_val.y_size,  param_range.max_val.y_size) or \
+                            not self.is_in_range(value.x_res, param_range.min_val.x_res,  param_range.max_val.x_res) or \
+                            not self.is_in_range(value.y_res, param_range.min_val.y_res,  param_range.max_val.y_res):
                                 str_min, str_max = self.get_param_range(param)
                                 rangeValues = "{%s}-{%s}" % (str_min, str_max)
                                 raise ValueError(f"parameter '{param_name}': invalid value '{param_value}' for range '{rangeValues}'")

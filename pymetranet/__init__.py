@@ -10,5 +10,5 @@ from .cmd_line_params import (CmdLineParams, ProductParamType, MapSizeRect,
 from .polar_data import PolarPpiData
 from .product_file import (ProductData, ProductDataPolar, ProductDataRect, ProductDataVertLevels,
     ProductTable, ProductDataType, ProductFile)
-from .lzw15 import compress as lzw15_compress, decompress as lzw15_decompress
 from .linker import Linker
+from .geo_reference import GeoReference, GeoRefGate
