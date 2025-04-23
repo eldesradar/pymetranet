@@ -1,3 +1,4 @@
+/build/
 /dist/
 /doc/build/
 /examples/**/__pycache__/
@@ -8,4 +9,6 @@
 /examples/dist/
 /libpymetranet/dist/
 /libpymetranet/obj/
+/pymetranet/libpymetranet.so
 /pymetranet/**/__pycache__/
+/pymetranet.egg-info/

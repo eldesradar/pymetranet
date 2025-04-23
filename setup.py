@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2025, Eldes, Matteo Galletti <m.galletti@eldes.it>
@@ -14,9 +14,6 @@ setup_requirements = [
 #    'setuptools_scm',
 ]
 
-test_requirements = [
-]
-
 extras = {
 }
 
@@ -24,7 +21,7 @@ packages = find_packages(include=['pymetranet'])
 
 package_dir = {}
 
-package_data = {}
+package_data = {'pymetranet': ['libpymetranet.so']}
 
 scripts = glob.glob('examples/*.py') 
 
@@ -35,7 +32,9 @@ setup(
     author="Eldes",
     author_email='info@eldes.t',
     description='Python Metranet library',
-    url='https://www.eldesradar.com',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
+    url='https://github.com/eldesradar/pymetranet',
     classifiers=[
         'License :: OSI Approved :: BSD-3-Clause License',
         'Natural Language :: English',
@@ -45,16 +44,14 @@ setup(
     entry_points={},
     scripts=scripts,
     license="BSD-3-Clause license",
-    long_description=open('README.md').read(),
-    include_package_data=True,
     zip_safe=False,
-    test_suite='test',
     py_modules=['pymetranet'],
     packages=packages,
+    python_requires='>=3.6',
     install_requires=requirements,
     package_dir=package_dir,
     package_data=package_data,
+    include_package_data=True,
     setup_requires=setup_requirements,
-    tests_require=test_requirements,
     extras_require=extras
 )

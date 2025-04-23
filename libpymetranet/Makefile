@@ -4,7 +4,7 @@ TARGET = libpymetranet.so
 # object dir
 OBJ_DIR = obj
 DIST_DIR = dist
-COPY_DIR = ../examples
+COPY_DIR = ../pymetranet
 
 # source files and headers
 SRC = lzw.c bitx.c version.c
