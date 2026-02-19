@@ -252,19 +252,21 @@ class ProductFile:
         if self._data_type == ProductDataType.Polar:
             num_rays: int = int(self.find_header_info_value("row"))
             num_gates: int = int(self.find_header_info_value("column"))
+            data_bits: int = int(self.find_header_info_value("data_bits"))
             #create self._data as a ProductDataPolar object, here
             #buffer is a 1D array but inside the constructor of ProductDataPolar
             #it will be reshaped to be a 2D array with num_rays rows and num_gates cols
-            self._data = ProductDataPolar(num_rays, num_gates, buffer)
+            self._data = ProductDataPolar(num_rays, num_gates, buffer, data_bits // 8)
         elif self._data_type == ProductDataType.Rect:
             x: int = int(self.find_header_info_value("column"))
             y: int = int(self.find_header_info_value("row"))
             xres: float = float(self.find_header_info_value("rect_xres"))
             yres: float = float(self.find_header_info_value("rect_yres"))
+            data_bits: int = int(self.find_header_info_value("data_bits"))
             #create self._data as a ProductDataRect object, here
             #buffer is a 1D array but inside the constructor of ProductDataRect
             #it will be reshaped to be a 2D array with y rows and x cols
-            self._data = ProductDataRect(x, y, xres, yres, buffer)
+            self._data = ProductDataRect(x, y, xres, yres, data_bits // 8, buffer)
         elif self._data_type == ProductDataType.VertLevels:
             num_floats32: int = int(self.find_header_info_value("row"))
             num_levels: int = int(self.find_header_info_value("column"))
@@ -293,19 +295,18 @@ class ProductFile:
             raise IOError("can't find info_uncompressed info in header")
         
         #compress data if compression is enabled
-        buff_size: int = self._data.num_rows * self._data.num_cols
+        buff_size: int = self._data.num_rows * self._data.num_cols * self._data.data_bytes
+        assert buff_size == self._data.data.nbytes, "data size in bytes does not match the expected size calculated from num_rows, num_cols and data_bytes"
         zip_buff = None
         zip_size = 0
         if compress:
-            zip_buff = lzw_compress(self._data.data.flatten(), self._data.data.size)
+            zip_buff = lzw_compress(self._data.data.flatten(), self._data.data.nbytes)
             zip_size = zip_buff.size
             if zip_size <= 0 or zip_size > buff_size:
                 raise IOError("error during compression of product data")
             info_compressed[1] = str(zip_size)
         else:
             info_compressed[1] = "0"
-
-        buff_size: int = self._data.num_rows * self._data.num_cols
         info_uncompressed[1] = str(buff_size)
 
         #openm file for binary writing
@@ -454,7 +455,69 @@ class ProductFile:
             str: The file name.
         """
         return self._file_name
+    
+    def is_8bit_uint(self) -> bool:
+        """
+        Determines if the product data is of type 8-bit unsigned integer.
 
+        Returns:
+            bool: True if the data type is 8-bit unsigned integer, False otherwise.
+        """
+        data_type = self.find_header_info_value("data_type")
+        data_bits = self.find_header_info_value("data_bits")
+
+        type_is_byte = data_type is not None and data_type.lower() == "byte"
+        bits_is_8    = data_bits is not None and data_bits.lower() == "8"
+
+        # True if the available information (even partial) is consistent with 8-bit unsigned int.
+        return type_is_byte or bits_is_8
+
+    def is_32bit_float(self) -> bool:
+        """
+        Determines if the product data is of type 32-bit float.
+
+        Returns:
+            bool: True if the data type is 32-bit float, False otherwise.
+        """
+        data_type = self.find_header_info_value("data_type")
+        data_bits = self.find_header_info_value("data_bits")
+
+        type_is_float = data_type is not None and data_type.lower() == "float"
+        bits_is_32    = data_bits is not None and data_bits.lower() == "32"
+
+        # True if the available information (even partial) is consistent with 8-bit unsigned int.
+        return type_is_float or bits_is_32
+
+    def get_conv_table(self) -> np.ndarray:
+        """
+        Retrieves the conversion table data as a NumPy array if available.
+
+        The method checks for the presence of a conversion table in the product tables,
+        determines its endianness based on header information, and returns the table data
+        as a NumPy array with the appropriate format.
+
+        Returns:
+            np.ndarray: The conversion table data if found; otherwise, None.
+        """
+        #try to detect endianness of data
+        big_endian = False
+        table_endianness = self.find_header_info_value("table_endianness")
+        if table_endianness is not None:
+            table_endianness_lower = table_endianness.lower()
+            if "big" in table_endianness_lower:
+                big_endian = True
+
+        #try to search for a conversion table in the product tables
+        conv_table = None
+        for table in self.get_tables():
+            table_name_lower = table.name.lower()
+            if "8bit" in table_name_lower and "metranet" in table_name_lower:
+                conv_table = table
+                break
+
+        format = ">f4" if big_endian else "<f4"
+        return conv_table.data.view(format) if conv_table is not None else None
+    
     def __get_valid_key_name(self, key: str):
         """
         Generates a valid unique key name for header info by appending an incremental counter if needed.

@@ -112,7 +112,7 @@ class Linker:
                 #create the hard link (only if the file does not exist)
                 if create_link:
                     if not os.path.exists(link_file):
-                        print("%s => %s" % (file_path_name, link_file))
+                        #print("%s => %s" % (file_path_name, link_file))
                         os.link(file_path_name, link_file)
         finally:
             f.close()

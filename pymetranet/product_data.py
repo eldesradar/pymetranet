@@ -78,7 +78,7 @@ class ProductDataPolar(ProductData):
         _num_rays (int): The number of rays.
         _num_gates (int): The number of gates.
     """
-    def __init__(self, num_rays: int, num_gates: int, data: np.ndarray=None) -> None:
+    def __init__(self, num_rays: int, num_gates: int, data_bytes: int=1, data: np.ndarray=None) -> None:
         """
         Initializes a new ProductDataPolar object.
 
@@ -92,6 +92,7 @@ class ProductDataPolar(ProductData):
 
         self._num_rays: int = num_rays
         self._num_gates: int = num_gates
+        self._data_bytes: int = data_bytes
 
         if data is None:
             self._data = data
@@ -102,7 +103,7 @@ class ProductDataPolar(ProductData):
             #of 2d array and verify congruence with num_rays and num gates
             #else if shape is not 1d nor 2d then raise an exception with assert
             assert data.ndim == 1 or data.ndim == 2
-            assert data.size == num_rays * num_gates
+            assert data.size == num_rays * num_gates * data_bytes
             if data.ndim == 1:
                 self.data = data.reshape(num_rays, num_gates)
             elif data.ndim == 2:
@@ -148,6 +149,16 @@ class ProductDataPolar(ProductData):
             int: The number of gates.
         """
         return self.num_gates
+    
+    @property
+    def data_bytes(self) -> int:
+        """
+        Returns the number of bytes per data element.
+
+        Returns:
+            int: The number of bytes per data element.
+        """
+        return self._data_bytes
 
 class ProductDataRect(ProductData):
     """
@@ -158,8 +169,9 @@ class ProductDataRect(ProductData):
 
     Attributes:
         _size (MapSizeRect): The map size and resolution parameters.
+        _data_bytes (int): The number of bytes per data element.
     """
-    def __init__(self, x_size: int, y_size: int, x_res: float, y_res: float, data: np.ndarray=None) -> None:
+    def __init__(self, x_size: int, y_size: int, x_res: float, y_res: float, data_bytes: int=1, data: np.ndarray=None) -> None:
         """
         Initializes a new ProductDataRect object.
 
@@ -173,6 +185,7 @@ class ProductDataRect(ProductData):
         super().__init__()
 
         self._size: MapSizeRect = MapSizeRect(x_size, y_size, x_res, y_res)
+        self._data_bytes: int = data_bytes
 
         if data is None:
             self._data = data
@@ -183,9 +196,12 @@ class ProductDataRect(ProductData):
             #of 2d array and verify congruence with x and y
             #else if shape is not 1d nor 2d then raise an exception with assert
             assert data.ndim == 1 or data.ndim == 2
-            assert data.size == x_size * y_size
+            assert data.size == x_size * y_size * data_bytes
             if data.ndim == 1:
-                self.data = data.reshape(y_size, x_size)
+                if data_bytes == 1:
+                    self.data = data.reshape(y_size, x_size)
+                elif data_bytes == 4:
+                    self.data = data.view(dtype=np.float32).reshape(y_size, x_size)
             elif data.ndim == 2:
                 assert data.shape[0] == y_size and data.shape[1] == x_size
                 self._data = data
@@ -209,6 +225,16 @@ class ProductDataRect(ProductData):
             int: The number of columns.
         """
         return self._size.x_size
+    
+    @property
+    def data_bytes(self) -> int:
+        """
+        Returns the number of bytes per data element.
+
+        Returns:
+            int: The number of bytes per data element.
+        """
+        return self._data_bytes
     
     def polar2rect(self, polar: ProductDataPolar, gate_width: float, vectorized: bool=True) -> None:
         """
@@ -250,10 +276,15 @@ class ProductDataRect(ProductData):
 
         num_gates: int = polar.num_gates
         
-        self._data = np.full((self._size.y_size, self._size.x_size), 0, dtype=np.uint8)
+        if polar.data_bytes == 1:
+            self._data = np.full((self._size.y_size, self._size.x_size), 0, dtype=np.uint8)
+        elif polar.data_bytes == 4:
+            self._data = np.full((self._size.y_size, self._size.x_size), np.nan, dtype=np.float32)
+        else:
+            raise TypeError(f"Unsupported data bytes value (only 1 for uint8 or 4 for float32 are supported): {polar.data_bytes}")
         
         for j in range(self._size.y_size):
-            y = j -radar_y0
+            y = j - radar_y0
             for i in range(self._size.x_size):
                 x = i - radar_x0
                 r = math.sqrt(x * x * x_res + y * y * y_res) #in km
@@ -282,7 +313,12 @@ class ProductDataRect(ProductData):
 
         num_gates: int = polar.num_gates
 
-        self._data = np.full((self._size.y_size, self._size.x_size), 0, dtype=np.uint8)
+        if polar.data_bytes == 1:
+            self._data = np.full((self._size.y_size, self._size.x_size), 0, dtype=np.uint8)
+        elif polar.data_bytes == 4:
+            self._data = np.full((self._size.y_size, self._size.x_size), np.nan, dtype=np.float32)
+        else:
+            raise TypeError(f"Unsupported data bytes value (only 1 for uint8 or 4 for float32 are supported): {polar.data_bytes}")
 
         # Create meshgrid for x and y coordinates
         y_indices, x_indices = np.meshgrid(np.arange(self._size.y_size), np.arange(self._size.x_size), indexing='ij')

@@ -31,15 +31,15 @@ scripts = glob.glob('examples/*.py')
 setup(
     name='pymetranet',
     #use_scm_version=True,
-    version="0.3.1",
+    version="0.4.0",
     author="Eldes",
     author_email='info@eldes.t',
     description='Python Metranet library',
     url='https://www.eldesradar.com',
     classifiers=[
-        'License :: OSI Approved :: BSD-3-Clause License',
+        'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7-3.8-3.9',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords='pymetranet',
     entry_points={},
