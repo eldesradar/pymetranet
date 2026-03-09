@@ -256,7 +256,7 @@ class ProductFile:
             #create self._data as a ProductDataPolar object, here
             #buffer is a 1D array but inside the constructor of ProductDataPolar
             #it will be reshaped to be a 2D array with num_rays rows and num_gates cols
-            self._data = ProductDataPolar(num_rays, num_gates, buffer, data_bits // 8)
+            self._data = ProductDataPolar(num_rays, num_gates, data_bits // 8, buffer)
         elif self._data_type == ProductDataType.Rect:
             x: int = int(self.find_header_info_value("column"))
             y: int = int(self.find_header_info_value("row"))
