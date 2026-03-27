@@ -2,6 +2,7 @@
 
 import struct
 from abc import ABC, abstractmethod
+import numpy as np
 
 from .volumesweep import PolarSweep
 from .volumesweep import  Ray, Moment, DataMomentHeader
@@ -175,31 +176,22 @@ class MSxSerializer(ABC):
             Exception: If an unrecognized data format is encountered or if gate data cannot be read.
         """
         if data_format == 1: #Fixed8Bit
-            num_ele = int(mom_header.datasize / 1)
-            fmt = "=%dB" % num_ele
+            dtype = np.uint8
         elif data_format == 2: #Float32Bit
-            num_ele = int(mom_header.datasize / 4)
-            fmt = "=%df" % num_ele
+            dtype = np.float32
         elif data_format == 3: #Fixed16Bit
-            num_ele = int(mom_header.datasize / 2)
-            fmt = "=%dH" % num_ele
+            dtype = np.uint16
         else:
             f.close()
             self.eof = True
             raise Exception("Error reading moment gates: unrecognized data format")
         
-        struct_len = struct.calcsize(fmt)
-        data = f.read(struct_len)
+        data = f.read(mom_header.datasize)
         if not data:
             f.close()
             self.eof = True
             raise Exception("Error reading moment gates")
-        s = struct.Struct(fmt)
-        unpacked_data = s.unpack(data)
         
-        ret_gates = [None] * num_ele
-        for i in range(len(unpacked_data)):
-            ret_gates[i] = unpacked_data[i]
-        
-        return ret_gates
+        return np.frombuffer(data, dtype=dtype).copy()
+    
         

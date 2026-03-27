@@ -598,3 +598,4 @@ class ProductFile:
             return True
         
         return False
+        

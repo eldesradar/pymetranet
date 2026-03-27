@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 #safe pymetranet import
 import import_pymetranet
-from pymetranet import ProductFile, lzw15_compress, lzw15_decompress
+from pymetranet import ProductFile, lzw_c
 
 def main():
     parser = argparse.ArgumentParser()
@@ -37,14 +37,16 @@ def main():
         idx_rows = filter[0]
         idx_cols = filter[1]
 
-        #compress data, uncompress again
-        buffer_of_bytes_from_loaded_file = buffer_from_load_file.tobytes()
-        print("len of buffer_of_bytes_from_loaded_file:", len(buffer_of_bytes_from_loaded_file))
-        compressed = lzw15_compress(buffer_of_bytes_from_loaded_file)
-        compressed_bytes = b"".join(compressed)
-        print("len of compressed_bytes:", len(compressed_bytes))
-        #newbytes = b"".join(lzw15_decompress(compressed))
-        newbytes = b"".join(lzw15_decompress(compressed_bytes))
+        #compress data
+        uncompressed_bytes = int(prod.find_header_info_value("uncompressed_bytes"))
+        buffer_of_bytes_from_loaded_file = buffer_from_load_file.flatten()
+        assert uncompressed_bytes == len(buffer_of_bytes_from_loaded_file)
+        print("len of buffer_of_bytes_from_loaded_file:", uncompressed_bytes)
+        compressed = lzw_c.lzw_compress(buffer_of_bytes_from_loaded_file, uncompressed_bytes)
+        print("len of compressed_bytes:", len(compressed))
+        #uncompress again
+        expanded = lzw_c.lzw_expand(compressed, len(compressed), uncompressed_bytes)
+        newbytes = expanded.tobytes()
         print("len of newbytes:", len(newbytes))
         oldbytes = buffer_from_load_file.tobytes()
         print("len of oldbytes:", len(oldbytes))

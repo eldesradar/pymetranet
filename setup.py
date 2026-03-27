@@ -31,7 +31,7 @@ scripts = glob.glob('examples/*.py')
 setup(
     name='pymetranet',
     #use_scm_version=True,
-    version="0.4.0",
+    version="0.5.0",
     author="Eldes",
     author_email='info@eldes.t',
     description='Python Metranet library',

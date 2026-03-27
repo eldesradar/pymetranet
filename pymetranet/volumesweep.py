@@ -3,6 +3,7 @@
 import math
 from enum import IntEnum
 from typing import List
+import numpy as np
 
 from .xml_util import XmlUtil
 
@@ -362,7 +363,7 @@ class Moment:
     """
     def __init__(self):
         self.datamomentheader = DataMomentHeader()
-        self.gates = []
+        self.gates: np.ndarray = None
         
     @property
     def num_gates(self) -> int:
@@ -412,6 +413,38 @@ class Moment:
             return mom_info.factora + mom_info.factorc * pow(10, exp)
 
         return float("nan")
+
+    def get_real_values_array(self, mom_info: MomentInfo) -> np.ndarray:
+        """
+        Vectorized equivalent of get_real_value(): applies the scaling formula
+        to all gates at once and returns a float32 NumPy array.
+
+        Gate value 0 maps to NaN for fixed-point formats, exactly as get_real_value() does.
+
+        Args:
+            mom_info (MomentInfo): The moment information object containing scaling parameters.
+
+        Returns:
+            np.ndarray: 1D float32 array of length num_gates with real (scaled) values.
+        """
+        raw = np.asarray(self.gates, dtype=np.float32)
+
+        if mom_info.dataformat == MomentInfo.DATA_FORMAT_FLOAT_32_BIT:
+            return raw
+
+        if mom_info.scaletype == MomentInfo.SCALE_TYPE_LINEAR:
+            return np.where(
+                raw == 0, np.nan,
+                mom_info.factora * raw + mom_info.factorb
+            ).astype(np.float32)
+
+        if mom_info.scaletype == MomentInfo.SCALE_TYPE_LOG:
+            return np.where(
+                raw == 0, np.nan,
+                mom_info.factora + mom_info.factorc * np.power(10.0, (1.0 - raw) / mom_info.factorb)
+            ).astype(np.float32)
+
+        return np.full(len(self.gates), np.nan, dtype=np.float32)
     
     @staticmethod
     def get_real_from_dn(mom_info: MomentInfo, dn: int) -> float:

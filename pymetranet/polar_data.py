@@ -237,7 +237,7 @@ class PolarPpiData:
                     self._data[az][k] = mom.get_real_value(mom_info, k) * self._mult if self._norm else mom.get_real_value(mom_info, k)
         
     @staticmethod
-    def build_az_range_matrix(sweep: PolarSweep, mom_id: int=None, mom_name: str=None) -> np.ndarray:
+    def build_az_range_matrix(sweep: PolarSweep, mom_id: int=None, mom_name: str=None, vectorized: bool=True) -> np.ndarray:
         """
         Builds and returns an azimuth range matrix from a polar sweep.
 
@@ -282,7 +282,37 @@ class PolarPpiData:
         sweep_info = PolarSweepInfo(sweep)
         norm = PolarPpiData.__detect_norm(sweep_info, mom_info)
         mult = PolarPpiData.__detect_mult(sweep_info, mom_info) if norm else float("nan")
-        
+
+        if vectorized:
+            return PolarPpiData.__build_az_range_matrix_vectorized(sweep, mom_id, mom_info, num_rays, num_gates, norm, mult)
+        else:
+            return PolarPpiData.__build_az_range_matrix(sweep, mom_id, mom_info, num_rays, num_gates, norm, mult)
+
+    @staticmethod
+    def __build_az_range_matrix_vectorized(sweep: PolarSweep, mom_id: int, mom_info: MomentInfo,
+                                           num_rays: int, num_gates: int, norm: bool, mult: float):
+        """
+        Internal version of build_az_range_matrix: vectorized version.
+        """
+        #generate rows delegating formula to get_real_values_array for each ray
+        rows = [
+            sweep.rays[i].get_moment_by_id(mom_id).get_real_values_array(mom_info)
+            for i in range(num_rays)
+        ]
+        data = np.stack(rows, axis=0) # shape: (num_rays, num_gates)
+
+        #apply normalization multiplier if required
+        if norm:
+            data = data * mult
+
+        return data
+    
+    @staticmethod
+    def __build_az_range_matrix(sweep: PolarSweep, mom_id: int, mom_info: MomentInfo,
+                                num_rays: int, num_gates: int, norm: bool, mult: float):
+        """
+        Internal version of build_az_range_matrix: scalar version.
+        """
         #initialize output matrix to all nan
         data = np.full((num_rays, num_gates), np.nan)
         
